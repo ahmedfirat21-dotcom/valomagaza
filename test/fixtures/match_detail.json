@@ -1,0 +1,71 @@
+{
+  "matchInfo": {
+    "matchId": "match-001",
+    "mapId": "map-ascent",
+    "gameMode": "Competitive",
+    "queueId": "competitive",
+    "gameStartMillis": 1710000000000,
+    "gameLengthMillis": 2100000
+  },
+  "players": [
+    {
+      "subject": "mock-puuid",
+      "gameName": "TestOyuncu",
+      "tagLine": "TR1",
+      "teamId": "Blue",
+      "characterId": "agent-jett",
+      "stats": {
+        "score": 3900,
+        "roundsPlayed": 20,
+        "kills": 18,
+        "deaths": 12,
+        "assists": 4
+      }
+    },
+    {
+      "subject": "ally-puuid",
+      "gameName": "TakımArkadaşı",
+      "tagLine": "TR1",
+      "teamId": "Blue",
+      "characterId": "agent-sage",
+      "stats": {
+        "score": 3000,
+        "roundsPlayed": 20,
+        "kills": 15,
+        "deaths": 14,
+        "assists": 8
+      }
+    },
+    {
+      "subject": "enemy-puuid",
+      "gameName": "Rakip",
+      "tagLine": "EUW",
+      "teamId": "Red",
+      "characterId": "agent-jett",
+      "stats": {
+        "score": 3600,
+        "roundsPlayed": 20,
+        "kills": 17,
+        "deaths": 15,
+        "assists": 2
+      }
+    }
+  ],
+  "teams": [
+    {"teamId": "Blue", "won": true, "roundsWon": 13},
+    {"teamId": "Red", "won": false, "roundsWon": 7}
+  ],
+  "roundResults": [
+    {
+      "playerStats": [
+        {
+          "subject": "mock-puuid",
+          "kills": [
+            {"finishingDamage": {"damageType": "Head"}},
+            {"finishingDamage": {"damageType": "Body"}}
+          ]
+        }
+      ]
+    }
+  ]
+}

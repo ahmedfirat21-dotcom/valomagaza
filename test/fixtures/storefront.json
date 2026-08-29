@@ -1,0 +1,71 @@
+{
+  "SkinsPanelLayout": {
+    "SingleItemOffersRemainingDurationInSeconds": 43210,
+    "SingleItemStoreOffers": [
+      {
+        "OfferID": "level-one",
+        "Cost": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 875,
+          "unused-currency": 99
+        }
+      },
+      {
+        "OfferID": "offer-two",
+        "Rewards": [
+          {"ItemID": "level-two", "Quantity": 1}
+        ],
+        "Cost": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 1275
+        }
+      },
+      {
+        "OfferID": "level-three",
+        "Cost": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 1775
+        }
+      },
+      {
+        "OfferID": "level-four",
+        "Cost": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 2175
+        }
+      }
+    ]
+  },
+  "BonusStore": {
+    "BonusStoreRemainingDurationInSeconds": 654321,
+    "BonusStoreOffers": [
+      {
+        "BonusOfferID": "bonus-one",
+        "Offer": {
+          "OfferID": "night-level-one",
+          "Cost": {
+            "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 1775
+          },
+          "Rewards": [
+            {"ItemID": "night-level-one", "Quantity": 1}
+          ]
+        },
+        "DiscountPercent": 31,
+        "DiscountCosts": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 1225
+        },
+        "IsSeen": false
+      },
+      {
+        "BonusOfferID": "bonus-two",
+        "Offer": {
+          "OfferID": "night-level-two",
+          "Cost": {
+            "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 875
+          }
+        },
+        "DiscountPercent": 20,
+        "DiscountCosts": {
+          "85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741": 700
+        },
+        "IsSeen": true
+      }
+    ]
+  }
+}
