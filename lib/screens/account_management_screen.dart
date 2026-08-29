@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../core/app_theme.dart';
+import '../core/secure_clipboard.dart';
 import '../models/auth_session.dart';
 import '../providers/auth_provider.dart';
 import '../providers/collection_provider.dart';
@@ -21,7 +21,7 @@ class AccountManagementScreen extends StatelessWidget {
   }
 
   Future<void> _importFromClipboard(BuildContext context) async {
-    final text = (await Clipboard.getData(Clipboard.kTextPlain))?.text ?? '';
+    final text = await SecureClipboard.readAndClearText();
     if (!context.mounted) return;
     await context.read<AuthProvider>().authenticateFromRedirect(text);
     if (!context.mounted) return;

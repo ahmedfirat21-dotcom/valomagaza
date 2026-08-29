@@ -21,6 +21,7 @@ class CompetitiveProvider extends ChangeNotifier {
   List<CompetitiveUpdate> _updates = const [];
   String? _errorMessage;
   String? _loadedPuuid;
+  int _loadGeneration = 0;
 
   CompetitiveStatus get status => _status;
   CurrentCompetitiveRank? get currentRank => _currentRank;
@@ -36,6 +37,7 @@ class CompetitiveProvider extends ChangeNotifier {
         _loadedPuuid == session.puuid) {
       return;
     }
+    final generation = ++_loadGeneration;
     _status = CompetitiveStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -49,6 +51,7 @@ class CompetitiveProvider extends ChangeNotifier {
       ]);
       final tiers = results[0] as Map<int, CompetitiveTierInfo>;
       final maps = results[1] as Map<String, MapCatalogEntry>;
+      if (!_isCurrent(generation, session.puuid)) return;
       _currentRank = CurrentCompetitiveRank.fromJson(
         results[2] as Map<String, dynamic>,
         tiers,
@@ -69,6 +72,7 @@ class CompetitiveProvider extends ChangeNotifier {
       _loadedPuuid = session.puuid;
       _status = CompetitiveStatus.ready;
     } on ApiException catch (error) {
+      if (!_isCurrent(generation, session.puuid)) return;
       if (error.isSessionExpired) {
         reset();
         await _authProvider.expireSession();
@@ -77,6 +81,7 @@ class CompetitiveProvider extends ChangeNotifier {
       _errorMessage = error.userMessage;
       _status = CompetitiveStatus.error;
     } catch (_) {
+      if (!_isCurrent(generation, session.puuid)) return;
       _errorMessage = const ApiException(
         ApiErrorType.competitiveData,
       ).userMessage;
@@ -86,6 +91,7 @@ class CompetitiveProvider extends ChangeNotifier {
   }
 
   void reset() {
+    _loadGeneration++;
     _status = CompetitiveStatus.idle;
     _currentRank = null;
     _updates = const [];
@@ -93,4 +99,8 @@ class CompetitiveProvider extends ChangeNotifier {
     _loadedPuuid = null;
     notifyListeners();
   }
+
+  bool _isCurrent(int generation, String puuid) =>
+      generation == _loadGeneration &&
+      _authProvider.session?.puuid.toLowerCase() == puuid.toLowerCase();
 }

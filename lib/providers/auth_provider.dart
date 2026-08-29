@@ -62,10 +62,6 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> handleIncomingLink(Uri uri) async {
-    await authenticateFromRedirect(uri.toString());
-  }
-
   Future<void> authenticateFromRedirect(String clipboardValue) async {
     if (_status == AuthStatus.authenticating) return;
     final previousSession = _session;
@@ -94,7 +90,7 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _authService.logout();
+    await _authService.logoutAll();
     _session = null;
     _accounts = await _authService.listAccounts();
     _errorMessage = null;

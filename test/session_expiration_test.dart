@@ -62,6 +62,30 @@ void main() {
 
     expect(session.isExpired, isFalse);
   });
+
+  test('kullanıcı çıkışı bütün kayıtlı hesap oturumlarını siler', () async {
+    final storage = SecureStorageService(store: _MemoryStore());
+    for (final puuid in ['first-puuid', 'second-puuid']) {
+      await storage.saveSession(
+        AuthSession(
+          accessToken: '$puuid-access',
+          idToken: '$puuid-id',
+          entitlementsToken: '$puuid-entitlement',
+          puuid: puuid,
+          region: 'eu',
+          shard: 'eu',
+        ),
+      );
+    }
+    final provider = AuthProvider(RiotAuthService(storage));
+    await provider.initialize();
+
+    await provider.logout();
+
+    expect(provider.status, AuthStatus.signedOut);
+    expect(provider.accounts, isEmpty);
+    expect(await storage.listAccounts(), isEmpty);
+  });
 }
 
 String _jwtWithExpiration(DateTime expiration) {

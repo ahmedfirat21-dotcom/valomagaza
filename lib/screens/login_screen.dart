@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../core/app_theme.dart';
 import '../core/constants.dart';
+import '../core/secure_clipboard.dart';
 import '../providers/auth_provider.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   Future<void> _readClipboard(BuildContext context) async {
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final value = await SecureClipboard.readAndClearText();
     if (!context.mounted) return;
-    await context.read<AuthProvider>().authenticateFromRedirect(
-      data?.text ?? '',
-    );
+    await context.read<AuthProvider>().authenticateFromRedirect(value);
   }
 
   @override
@@ -93,7 +91,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Tarayıcıda Riot girişi tamamlandığında uygulama otomatik olarak öne gelir ve oturumunuz açılır. Otomatik geçiş gerçekleşmezse tarayıcının adres çubuğundaki bağlantıyı kopyalayıp aşağıdaki butona basın.',
+                          'Tarayıcıda Riot girişi tamamlandıktan sonra adres çubuğundaki bağlantının tamamını kopyalayın, uygulamaya dönün ve aşağıdaki butona basın. Bağlantı okunduktan sonra güvenlik için telefonun panosu temizlenir.',
                           style: TextStyle(
                             color: AppColors.muted,
                             height: 1.45,
@@ -179,7 +177,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Riot Mobile, bu web giriş bağlantısını uygulamaya geri döndüren belgelenmiş bir OAuth bağlantısı sunmadığı için giriş güvenli tarayıcı sayfasında tamamlanır.',
+                    'Bu kişisel uygulama Riot’un resmî RSO istemcisini kullanmaz. Giriş bağlantısı erişim tokenı içerdiği için kopyaladıktan sonra kimseyle paylaşmayın.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: AppColors.muted,

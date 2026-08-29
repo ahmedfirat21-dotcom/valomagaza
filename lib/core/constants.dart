@@ -2,6 +2,8 @@ class AppConstants {
   AppConstants._();
 
   static const appName = 'Valo Mağaza';
+  static const privacyPolicyUrl =
+      'https://github.com/ahmedfirat21-dotcom/valomagaza/blob/main/PRIVACY.md';
   static const requestTimeout = Duration(seconds: 20);
 
   static const authUrl =
@@ -41,7 +43,8 @@ class AppConstants {
       'ew0KCSJwbGF0Zm9ybVR5cGUiOiAiUEMiLA0KCSJwbGF0Zm9ybU9TIjogIldpbmRvd3MiLA0KCSJwbGF0Zm9ybU9TVmVyc2lvbiI6ICIxMC4wLjE5MDQyLjEuMjU2LjY0Yml0IiwNCgkicGxhdGZvcm1DaGlwc2V0IjogIlVua25vd24iDQp9';
 
   static const legalNotice =
-      'Valo Mağaza, Riot Games tarafından desteklenmemekte veya '
-      'onaylanmamaktadır. Riot Games ve ilişkili tüm varlıklar Riot Games, '
-      'Inc.’in ticari markalarıdır.';
+      "Valo Mağaza isn't endorsed by Riot Games and doesn't reflect the views "
+      'or opinions of Riot Games or anyone officially involved in producing or '
+      'managing Riot Games properties. Riot Games, and all associated '
+      'properties are trademarks or registered trademarks of Riot Games, Inc.';
 }

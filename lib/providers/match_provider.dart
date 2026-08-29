@@ -19,6 +19,7 @@ class MatchProvider extends ChangeNotifier {
   List<MatchSummary> _matches = const [];
   String? _errorMessage;
   String? _loadedPuuid;
+  int _loadGeneration = 0;
 
   MatchStatus get status => _status;
   List<MatchSummary> get matches => _matches;
@@ -33,6 +34,7 @@ class MatchProvider extends ChangeNotifier {
         _loadedPuuid == session.puuid) {
       return;
     }
+    final generation = ++_loadGeneration;
     _status = MatchStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -50,6 +52,7 @@ class MatchProvider extends ChangeNotifier {
       // Ayrıntı istekleri kasıtlı olarak sırayla yapılır. Böylece kısa sürede
       // çok sayıda private endpoint isteği atılmaz; 429'da yeniden deneme yoktur.
       for (final id in ids) {
+        if (!_isCurrent(generation, session.puuid)) return;
         final detail = await _matchService.fetchMatchDetail(
           session,
           version,
@@ -64,10 +67,12 @@ class MatchProvider extends ChangeNotifier {
           ),
         );
       }
+      if (!_isCurrent(generation, session.puuid)) return;
       _matches = List.unmodifiable(matches);
       _loadedPuuid = session.puuid;
       _status = MatchStatus.ready;
     } on ApiException catch (error) {
+      if (!_isCurrent(generation, session.puuid)) return;
       if (error.isSessionExpired) {
         reset();
         await _authProvider.expireSession();
@@ -76,6 +81,7 @@ class MatchProvider extends ChangeNotifier {
       _errorMessage = error.userMessage;
       _status = MatchStatus.error;
     } catch (_) {
+      if (!_isCurrent(generation, session.puuid)) return;
       _errorMessage = const ApiException(ApiErrorType.matchData).userMessage;
       _status = MatchStatus.error;
     }
@@ -83,10 +89,15 @@ class MatchProvider extends ChangeNotifier {
   }
 
   void reset() {
+    _loadGeneration++;
     _status = MatchStatus.idle;
     _matches = const [];
     _errorMessage = null;
     _loadedPuuid = null;
     notifyListeners();
   }
+
+  bool _isCurrent(int generation, String puuid) =>
+      generation == _loadGeneration &&
+      _authProvider.session?.puuid.toLowerCase() == puuid.toLowerCase();
 }

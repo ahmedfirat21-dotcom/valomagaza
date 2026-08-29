@@ -53,6 +53,15 @@ class WishlistProvider extends ChangeNotifier {
     return added;
   }
 
+  Future<void> clear() async {
+    _wishlistIds.clear();
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_key);
+    } catch (_) {}
+  }
+
   List<SkinOffer> getMatchingOffers(List<SkinOffer> offers) {
     return offers
         .where((offer) => _wishlistIds.contains(offer.itemId.toLowerCase()))

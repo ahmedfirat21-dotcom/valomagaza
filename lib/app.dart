@@ -1,6 +1,3 @@
-import 'dart:async';
-
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -92,50 +89,8 @@ class ValoMagazaApp extends StatelessWidget {
   }
 }
 
-class _AuthGate extends StatefulWidget {
+class _AuthGate extends StatelessWidget {
   const _AuthGate();
-
-  @override
-  State<_AuthGate> createState() => _AuthGateState();
-}
-
-class _AuthGateState extends State<_AuthGate> {
-  late final AppLinks _appLinks;
-  StreamSubscription<Uri>? _linkSubscription;
-  String? _lastHandledUri;
-
-  @override
-  void initState() {
-    super.initState();
-    _appLinks = AppLinks();
-    _initDeepLinks();
-  }
-
-  void _onUriReceived(Uri uri) {
-    final uriString = uri.toString();
-    if (_lastHandledUri == uriString) return;
-    _lastHandledUri = uriString;
-    if (mounted) {
-      context.read<AuthProvider>().handleIncomingLink(uri);
-    }
-  }
-
-  Future<void> _initDeepLinks() async {
-    // Uygulama tamamen kapalıyken gelen link (cold start)
-    final initialLink = await _appLinks.getInitialLink();
-    if (initialLink != null) {
-      _onUriReceived(initialLink);
-    }
-
-    // Uygulama arka planda ya da ön plandayken gelen link (warm/hot start)
-    _linkSubscription = _appLinks.uriLinkStream.listen(_onUriReceived);
-  }
-
-  @override
-  void dispose() {
-    _linkSubscription?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {

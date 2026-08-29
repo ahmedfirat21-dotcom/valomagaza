@@ -30,29 +30,33 @@ class StoreScreen extends StatefulWidget {
 }
 
 class _StoreScreenState extends State<StoreScreen> {
-  String? _lastNotifiedPuuid;
+  String? _observedPuuid;
 
-  @override
-  void initState() {
-    super.initState();
+  void _loadForSession(AuthSession session) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final store = context.read<StoreProvider>();
-      final session = context.read<AuthProvider>().session;
-      if (session != null) {
-        store.load(session).then((_) {
-          if (mounted && session.puuid != _lastNotifiedPuuid) {
-            _checkHistoryAndNotifications(store, session);
-          }
-        });
-      }
+      store.load(session, force: true).then((_) {
+        if (!mounted) return;
+        final activePuuid = context.read<AuthProvider>().session?.puuid;
+        if (activePuuid == session.puuid) {
+          _checkHistoryAndNotifications(store, session);
+        }
+      });
     });
+  }
+
+  Future<void> _refreshStore() async {
+    final session = context.read<AuthProvider>().session;
+    if (session == null) return;
+    final store = context.read<StoreProvider>();
+    await store.load(session, force: true);
+    if (!mounted) return;
+    _checkHistoryAndNotifications(store, session);
   }
 
   void _checkHistoryAndNotifications(StoreProvider store, AuthSession session) {
     if (store.status != StoreStatus.ready || store.offers.isEmpty) return;
-    _lastNotifiedPuuid = session.puuid;
-
     // Geçmişe kaydet
     context.read<StoreHistoryService>().saveStorefront(
       session.puuid,
@@ -66,6 +70,7 @@ class _StoreScreenState extends State<StoreScreen> {
     final matches = wishlist.getMatchingOffers(allOffers);
     if (matches.isNotEmpty) {
       context.read<NotificationService>().showWishlistMatchNotification(
+        puuid: session.puuid,
         skinNames: matches.map((m) => m.name).toList(),
       );
     }
@@ -152,6 +157,11 @@ class _StoreScreenState extends State<StoreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final session = context.watch<AuthProvider>().session;
+    if (session != null && session.puuid != _observedPuuid) {
+      _observedPuuid = session.puuid;
+      _loadForSession(session);
+    }
     final store = context.watch<StoreProvider>();
     final wishlist = context.watch<WishlistProvider>();
     final allOffers = [...store.offers, ...store.nightMarketOffers];
@@ -185,7 +195,7 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
           IconButton(
             tooltip: 'Yenile',
-            onPressed: store.isLoading ? null : store.refresh,
+            onPressed: store.isLoading ? null : _refreshStore,
             icon: const Icon(Icons.refresh_rounded),
           ),
           PopupMenuButton<String>(
@@ -243,7 +253,7 @@ class _StoreScreenState extends State<StoreScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: store.refresh,
+        onRefresh: _refreshStore,
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [

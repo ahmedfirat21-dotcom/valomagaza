@@ -116,5 +116,17 @@ class StoreHistoryService {
       return [];
     }
   }
-}
 
+  Future<void> clearAllHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs
+          .getKeys()
+          .where((key) => key.startsWith(_historyPrefix))
+          .toList(growable: false);
+      for (final key in keys) {
+        await prefs.remove(key);
+      }
+    } catch (_) {}
+  }
+}
