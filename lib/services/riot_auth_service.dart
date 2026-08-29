@@ -16,10 +16,17 @@ class RiotAuthService {
   final http.Client _client;
 
   static OAuthTokens parseRedirectUrl(String value) {
-    final uri = Uri.tryParse(value.trim());
+    final normalized = value.trim();
+    if (normalized.isEmpty || normalized.length > 16384) {
+      throw const ApiException(ApiErrorType.invalidLoginUrl);
+    }
+    final uri = Uri.tryParse(normalized);
     if (uri == null ||
+        uri.scheme.toLowerCase() != 'http' ||
         uri.host.toLowerCase() != 'localhost' ||
-        uri.path != '/redirect') {
+        uri.path != '/redirect' ||
+        uri.hasQuery ||
+        (uri.hasPort && uri.port != 80)) {
       throw const ApiException(ApiErrorType.invalidLoginUrl);
     }
     final fragment = Uri.splitQueryString(uri.fragment);
@@ -28,7 +35,9 @@ class RiotAuthService {
     if (accessToken == null ||
         accessToken.isEmpty ||
         idToken == null ||
-        idToken.isEmpty) {
+        idToken.isEmpty ||
+        accessToken.length > 8192 ||
+        idToken.length > 8192) {
       throw const ApiException(ApiErrorType.invalidLoginUrl);
     }
     return OAuthTokens(accessToken: accessToken, idToken: idToken);

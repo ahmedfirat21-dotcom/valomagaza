@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_theme.dart';
 import '../core/constants.dart';
@@ -8,7 +9,9 @@ import '../providers/collection_provider.dart';
 import '../providers/competitive_provider.dart';
 import '../providers/match_provider.dart';
 import '../providers/store_provider.dart';
+import '../providers/wishlist_provider.dart';
 import '../services/notification_service.dart';
+import '../services/store_history_service.dart';
 import '../widgets/skin_search_sheet.dart';
 import '../widgets/store_history_sheet.dart';
 import 'account_management_screen.dart';
@@ -41,6 +44,53 @@ class ProfileScreen extends StatelessWidget {
     context.read<MatchProvider>().reset();
     context.read<CollectionProvider>().reset();
     context.read<CompetitiveProvider>().reset();
+    await context.read<AuthProvider>().logout();
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final opened = await launchUrl(
+      Uri.parse(AppConstants.privacyPolicyUrl),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gizlilik politikası açılamadı.')),
+      );
+    }
+  }
+
+  Future<void> _clearAllLocalData(BuildContext context) async {
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Tüm yerel veriler silinsin mi?'),
+        content: const Text(
+          'Kayıtlı Riot oturumları, mağaza geçmişi, istek listesi ve bildirim ayarları bu telefondan kalıcı olarak silinecek.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Tümünü Sil'),
+          ),
+        ],
+      ),
+    );
+    if (approved != true || !context.mounted) return;
+
+    context.read<StoreProvider>().reset();
+    context.read<MatchProvider>().reset();
+    context.read<CollectionProvider>().reset();
+    context.read<CompetitiveProvider>().reset();
+    await context.read<StoreHistoryService>().clearAllHistory();
+    if (!context.mounted) return;
+    await context.read<WishlistProvider>().clear();
+    if (!context.mounted) return;
+    await context.read<NotificationService>().clearLocalSettings();
+    if (!context.mounted) return;
     await context.read<AuthProvider>().logout();
   }
 
@@ -157,7 +207,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'İstek listendeki bir skin mağazada çıktığında bildirim gönder.',
+                            'Uygulamayı açtığında veya mağazayı yenilediğinde eşleşme varsa günde bir kez bildir.',
                             style: TextStyle(color: AppColors.muted, fontSize: 12),
                           ),
                         ],
@@ -169,12 +219,22 @@ class ProfileScreen extends StatelessWidget {
                       activeTrackColor: AppColors.accent,
                       onChanged: (val) async {
                         final notifService = context.read<NotificationService>();
+                        var enabled = val;
                         if (val) {
-                          await notifService.requestPermissions();
+                          enabled = await notifService.requestPermissions();
                         }
-                        await notifService.setNotificationsEnabled(val);
+                        await notifService.setNotificationsEnabled(enabled);
                         if (context.mounted) {
                           (context as Element).markNeedsBuild();
+                          if (val && !enabled) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Bildirim izni verilmediği için özellik açılmadı.',
+                                ),
+                              ),
+                            );
+                          }
                         }
                       },
                     ),
@@ -229,12 +289,25 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+          _InfoTile(
+            icon: Icons.privacy_tip_outlined,
+            title: 'Gizlilik Politikası',
+            detail:
+                'İşlenen verileri, cihazda saklama şeklini ve silme seçeneklerini incele.',
+            onTap: () => _openPrivacyPolicy(context),
+          ),
           Text(AppConstants.legalNotice, style: const TextStyle(height: 1.45)),
           const SizedBox(height: 28),
           OutlinedButton.icon(
             onPressed: () => _logout(context),
             icon: const Icon(Icons.logout_rounded),
             label: const Text('Bu Cihazdan Çıkış Yap'),
+          ),
+          const SizedBox(height: 10),
+          TextButton.icon(
+            onPressed: () => _clearAllLocalData(context),
+            icon: const Icon(Icons.delete_forever_outlined),
+            label: const Text('Tüm Yerel Verileri Sil'),
           ),
         ],
       ),

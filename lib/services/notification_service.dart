@@ -8,10 +8,11 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _plugin;
   static const _enabledKey = 'valo_magaza_notifications_enabled';
+  static const _notificationPrefix = 'valo_magaza_last_notification_';
   static const _channelId = 'valo_store_channel';
   static const _channelName = 'Mağaza Bildirimleri';
   static const _channelDescription =
-      'İstek listenizdeki kaplamalar mağazanıza geldiğinde gönderilen bildirimler.';
+      'Uygulama açıldığında istek listenizle eşleşen mağaza teklifleri.';
 
   bool _isInitialized = false;
 
@@ -56,11 +57,36 @@ class NotificationService {
     } catch (_) {}
   }
 
+  Future<void> clearLocalSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_enabledKey);
+      final keys = prefs
+          .getKeys()
+          .where((key) => key.startsWith(_notificationPrefix))
+          .toList(growable: false);
+      for (final key in keys) {
+        await prefs.remove(key);
+      }
+    } catch (_) {}
+  }
+
   Future<void> showWishlistMatchNotification({
+    required String puuid,
     required List<String> skinNames,
   }) async {
     final enabled = await isNotificationsEnabled();
     if (!enabled || skinNames.isEmpty) return;
+
+    final now = DateTime.now();
+    final date =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final notificationKey = '$_notificationPrefix${puuid.toLowerCase()}';
+    SharedPreferences? prefs;
+    try {
+      prefs = await SharedPreferences.getInstance();
+      if (prefs.getString(notificationKey) == date) return;
+    } catch (_) {}
 
     await initialize();
 
@@ -89,6 +115,7 @@ class NotificationService {
         body: body,
         notificationDetails: platformDetails,
       );
+      await prefs?.setString(notificationKey, date);
     } catch (e) {
       debugPrint('Error showing notification: $e');
     }

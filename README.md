@@ -2,6 +2,10 @@
 
 Valo Mağaza, kişisel VALORANT hesabının günlük mağazasındaki dört kaplama teklifini, aktif olduğunda Gece Pazarı indirimlerini, VP/Radianite/Kingdom Credits bakiyelerini, yenilenme sürelerini ve son 10 tamamlanmış maçın özetini Android telefonda gösteren Türkçe bir Flutter uygulamasıdır. Uygulama yalnızca görüntüleme yapar; satın alma, otomatik satın alma veya canlı oyuna müdahale özelliği yoktur.
 
+> **Önemli:** Bu proje kişisel kullanım içindir. Riot'un belgelenmemiş/private
+> endpoint'lerini ve resmî olmayan bir giriş akışını kullandığı için Google Play
+> yayınına veya Riot ürün onayına uygun olduğu iddia edilmez.
+
 ## Uygulama bölümleri
 
 - **Mağaza:** Günlük teklifler, Gece Pazarı, normal/indirimli VP fiyatları, içerik seviyeleri ve VP/RP/KC bakiyeleri.
@@ -85,9 +89,9 @@ secret'larını tanımlayın ve **Android release bundle** iş akışını elle 
 2. Telefonun gerçek tarayıcısında açılan Riot sayfasında giriş yapın. Riot kullanıcı adı ve şifresi Valo Mağaza ekranına girilmez.
 3. Girişten sonra tarayıcı `http://localhost/redirect#access_token=...` ile başlayan bir adrese gider. Localhost sayfasının açılmaması normaldir.
 4. Tarayıcının adres çubuğuna dokunup bağlantının **tamamını** kopyalayın; yalnız görünen kısmı değil, fragment içeren tam URL’yi kopyaladığınızdan emin olun.
-5. Valo Mağaza’ya dönüp **Panodan Bağlantıyı Al** düğmesine dokunun.
+5. Valo Mağaza’ya dönüp **Panodan Bağlantıyı Al** düğmesine dokunun. Uygulama bağlantıyı okuduktan hemen sonra panoyu temizler.
 
-Riot Mobile yüklü olsa bile giriş tarayıcıda açılır. Riot Mobile, bu web OAuth bağlantısını Valo Mağaza’ya geri döndüren belgelenmiş bir deep-link şeması sunmadığı için uygulamayı zorla açmak giriş tokenını geri getirmez.
+Riot Mobile yüklü olsa bile giriş tarayıcıda açılır. Güvenilir ve doğrulanmış bir uygulama bağlantısı bulunmadığı için token içeren `http://localhost` adresi Android deep-link olarak kaydedilmez; kullanıcı bağlantıyı kendisi uygulamaya aktarır.
 
 Uygulama yalnız host değeri `localhost`, path değeri `/redirect` olan bağlantıları kabul eder. Tokenları URL fragment bölümünden cihaz üzerinde çıkarır.
 
@@ -99,13 +103,17 @@ Uygulama yalnız host değeri `localhost`, path değeri `/redirect` olan bağlan
 - Analytics, reklam ve hata takip SDK’sı yoktur.
 - SSL sertifika doğrulaması kapatılmaz.
 - 401/403 yanıtında oturum verileri temizlenir ve giriş ekranına dönülür.
-- **Çıkış Yap** bütün yerel oturum alanlarını siler.
+- **Çıkış Yap** bu cihazda kayıtlı bütün Riot oturumlarını siler.
+- **Tüm Yerel Verileri Sil** oturumların yanında mağaza geçmişini, istek listesini ve bildirim ayarlarını da temizler.
 
 Kopyalanan redirect bağlantısı erişim tokenı içerdiği için başka biriyle paylaşılmamalıdır.
 
+Gizlilik ve yerel veri saklama ayrıntıları için [Gizlilik Politikası](PRIVACY.md)
+belgesine bakın.
+
 ## Resmî olmayan uygulama bildirimi
 
-> Valo Mağaza, Riot Games tarafından desteklenmemekte veya onaylanmamaktadır. Riot Games ve ilişkili tüm varlıklar Riot Games, Inc.’in ticari markalarıdır.
+> Valo Mağaza isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.
 
 Uygulama logosu Riot Games veya VALORANT logosu değildir; proje için oluşturulmuş özgün bir V simgesidir.
 

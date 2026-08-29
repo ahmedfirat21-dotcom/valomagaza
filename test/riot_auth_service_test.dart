@@ -29,11 +29,39 @@ void main() {
       );
     });
 
+    test('https ve farklı port kullanan localhost bağlantıları reddedilir', () {
+      for (final url in [
+        'https://localhost/redirect#access_token=x&id_token=y',
+        'http://localhost:8080/redirect#access_token=x&id_token=y',
+      ]) {
+        expect(
+          () => RiotAuthService.parseRedirectUrl(url),
+          throwsA(isA<ApiException>()),
+        );
+      }
+    });
+
+    test('query parametresinde token taşıyan bağlantı reddedilir', () {
+      expect(
+        () => RiotAuthService.parseRedirectUrl(
+          'http://localhost/redirect?access_token=x&id_token=y',
+        ),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
     test('access token eksik URL reddedilir', () {
       expect(
         () => RiotAuthService.parseRedirectUrl(
           'http://localhost/redirect#id_token=not-a-real-id-token',
         ),
+        throwsA(isA<ApiException>()),
+      );
+    });
+
+    test('aşırı büyük pano içeriği reddedilir', () {
+      expect(
+        () => RiotAuthService.parseRedirectUrl(List.filled(16385, 'x').join()),
         throwsA(isA<ApiException>()),
       );
     });

@@ -69,4 +69,27 @@ void main() {
       'second-puuid',
     );
   });
+
+  test('tüm oturumları temizleme kayıtlı hesap bırakmaz', () async {
+    final memory = MemorySecureStore();
+    final storage = SecureStorageService(store: memory);
+    for (final puuid in ['first-puuid', 'second-puuid']) {
+      await storage.saveSession(
+        AuthSession(
+          accessToken: '$puuid-access',
+          idToken: '$puuid-id',
+          entitlementsToken: '$puuid-entitlement',
+          puuid: puuid,
+          region: 'eu',
+          shard: 'eu',
+        ),
+      );
+    }
+
+    await storage.clearAllSessions();
+
+    expect(memory.values, isEmpty);
+    expect(await storage.listAccounts(), isEmpty);
+    expect(await storage.readSession(), isNull);
+  });
 }

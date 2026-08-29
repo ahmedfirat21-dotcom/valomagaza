@@ -25,6 +25,7 @@ class StoreProvider extends ChangeNotifier {
   DateTime? _nightMarketRefreshAt;
   String? _errorMessage;
   String? _loadedPuuid;
+  int _loadGeneration = 0;
 
   StoreStatus get status => _status;
   List<SkinOffer> get offers => _offers;
@@ -42,6 +43,7 @@ class StoreProvider extends ChangeNotifier {
         _loadedPuuid == session.puuid) {
       return;
     }
+    final generation = ++_loadGeneration;
     _status = StoreStatus.loading;
     _errorMessage = null;
     notifyListeners();
@@ -56,6 +58,7 @@ class StoreProvider extends ChangeNotifier {
       final storefront = results[0] as StorefrontSnapshot;
       final catalog = results[2] as Map<String, SkinCatalogEntry>;
       final tiers = results[3] as Map<String, ContentTierInfo>;
+      if (!_isCurrent(generation, session.puuid)) return;
       _wallet = results[1] as Wallet;
       _offers = storefront.offers
           .map((offer) => SkinOffer.resolve(offer, catalog, tiers))
@@ -74,6 +77,7 @@ class StoreProvider extends ChangeNotifier {
       _loadedPuuid = session.puuid;
       _status = StoreStatus.ready;
     } on ApiException catch (error) {
+      if (!_isCurrent(generation, session.puuid)) return;
       if (error.isSessionExpired) {
         reset();
         await _authProvider.expireSession();
@@ -82,6 +86,7 @@ class StoreProvider extends ChangeNotifier {
       _errorMessage = error.userMessage;
       _status = StoreStatus.error;
     } catch (_) {
+      if (!_isCurrent(generation, session.puuid)) return;
       _errorMessage = const ApiException(ApiErrorType.storeData).userMessage;
       _status = StoreStatus.error;
     }
@@ -94,6 +99,7 @@ class StoreProvider extends ChangeNotifier {
   }
 
   void reset() {
+    _loadGeneration++;
     _status = StoreStatus.idle;
     _offers = const [];
     _nightMarketOffers = const [];
@@ -104,4 +110,8 @@ class StoreProvider extends ChangeNotifier {
     _loadedPuuid = null;
     notifyListeners();
   }
+
+  bool _isCurrent(int generation, String puuid) =>
+      generation == _loadGeneration &&
+      _authProvider.session?.puuid.toLowerCase() == puuid.toLowerCase();
 }
