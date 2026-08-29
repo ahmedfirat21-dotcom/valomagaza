@@ -48,6 +48,37 @@ USB hata ayıklama açık bir telefon bağlıysa terminalden de kurulabilir:
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 ```
 
+## Google Play için imzalı AAB
+
+Release derlemesi hiçbir zaman debug anahtarıyla imzalanmaz. Önce uzun süre
+güvenle saklanacak bir upload keystore oluşturun ve `android/key.properties.example`
+dosyasını `android/key.properties` adıyla kopyalayıp gerçek değerleri girin.
+`key.properties` ve `.jks` dosyaları Git tarafından yok sayılır; bunları depoya
+eklemeyin.
+
+Yerel mağaza paketi şu komutla üretilir:
+
+```powershell
+flutter build appbundle --release
+```
+
+Çıktı:
+
+```text
+build/app/outputs/bundle/release/app-release.aab
+```
+
+GitHub Actions üzerinden üretmek için depo ayarlarında aşağıdaki Actions
+secret'larını tanımlayın ve **Android release bundle** iş akışını elle çalıştırın:
+
+- `ANDROID_KEYSTORE_BASE64`: `.jks` dosyasının Base64 içeriği
+- `ANDROID_STORE_PASSWORD`: keystore şifresi
+- `ANDROID_KEY_ALIAS`: anahtar takma adı
+- `ANDROID_KEY_PASSWORD`: anahtar şifresi
+
+İş akışı analiz ve testleri çalıştırdıktan sonra imzalı AAB'yi 14 gün saklanan
+`valomagaza-release-aab` artifact'i olarak verir.
+
 ## Riot girişi ve bağlantıyı kopyalama
 
 1. Uygulamada **Riot Hesabımla Giriş Yap** düğmesine dokunun.
