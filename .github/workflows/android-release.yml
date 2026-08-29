@@ -58,10 +58,15 @@ jobs:
       - name: Build signed app bundle
         run: flutter build appbundle --release
 
-      - name: Upload app bundle
+      - name: Build signed APK
+        run: flutter build apk --release
+
+      - name: Upload release packages
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: valomagaza-release-aab
-          path: build/app/outputs/bundle/release/app-release.aab
+          name: valomagaza-release-packages
+          path: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
           retention-days: 14
